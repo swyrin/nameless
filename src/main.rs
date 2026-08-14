@@ -1,0 +1,71 @@
+mod commands;
+mod config;
+mod handlers;
+mod nameless_types;
+mod persistence;
+mod utils;
+
+use crate::persistence::connection::{create_database_connection, perform_migration};
+use crate::{nameless_types::NamelessGlobalData, utils::fs::get_cwd};
+use config::data::AppConfig;
+use handlers::event_handler;
+use poise::serenity_prelude;
+
+#[tokio::main]
+async fn main() {
+    tracing_subscriber::fmt().with_test_writer().init();
+
+    let config = AppConfig::load();
+    let token = config.get_token();
+
+    let framework = poise::Framework::builder()
+        .options(poise::FrameworkOptions {
+            commands: vec![commands::honeypot::honeypot(), commands::xkcd::xkcd()],
+            event_handler: |ctx, event, fx, data| {
+                Box::pin(event_handler::event_handler(ctx, event, fx, data))
+            },
+            ..Default::default()
+        })
+        .setup(|ctx, _ready, framework| {
+            Box::pin(async move {
+                perform_migration().await;
+                let connection = create_database_connection().await;
+
+                match config.get_test_guild_id() {
+                    Some(id) => {
+                        tracing::warn!(
+                            "{}",
+                            format!("Command is registered locally in guild {}", id)
+                        );
+
+                        poise::builtins::register_in_guild(
+                            ctx,
+                            &framework.options().commands,
+                            id.into(),
+                        )
+                        .await?
+                    }
+                    None => {
+                        tracing::info!("Command is registered globally.");
+
+                        poise::builtins::register_globally(ctx, &framework.options().commands)
+                            .await?
+                    }
+                }
+
+                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
+                Ok(NamelessGlobalData { db: connection })
+            })
+        })
+        .build();
+
+    let client = serenity_prelude::ClientBuilder::new(
+        token,
+        serenity_prelude::GatewayIntents::non_privileged()
+            | serenity_prelude::GatewayIntents::MESSAGE_CONTENT,
+    )
+    .framework(framework)
+    .await;
+
+    client.unwrap().start().await.unwrap()
+}

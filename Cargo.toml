@@ -1,0 +1,33 @@
+[package]
+name = "nameless-ng"
+version = "0.1.0"
+edition = "2024"
+default-run = "nameless-ng"
+
+[workspace]
+members = [".", "crates/xkcd-nameless"]
+default-members = ["."]
+
+[workspace.dependencies]
+xkcd-nameless = { path = "crates/xkcd-nameless" }
+
+[dependencies]
+diesel = "2.3.12"
+diesel-async = {
+    version = "0.9.2",
+    features = ["postgres", "async-connection-wrapper", "migrations"]
+}
+diesel_migrations = { version = "2.3.2", features = ["postgres"] }
+jiff = "0.2.35"
+poise = { version = "0.6.2" }
+serde = { version = "1.0.229", features = ["derive"] }
+tokio = { version = "1.53.1", features = ["full"] }
+toml = "1.1.4+spec-1.1.0"
+tracing = "0.1.44"
+tracing-subscriber = "0.3.23"
+xkcd-nameless = { workspace = true }
+
+[profile.release]
+debug = 2
+lto = "thin"
+panic = "abort"
