@@ -9,9 +9,12 @@ use std::str::FromStr;
 
 /// Honeypot commands.
 #[poise::command(
+    guild_only,
     slash_command,
     subcommands("get", "set", "unset", "toggle"),
-    subcommand_required
+    subcommand_required,
+    default_member_permissions = "MANAGE_GUILD",
+    required_bot_permissions = "BAN_MEMBERS"
 )]
 pub async fn honeypot(_: NamelessContext<'_>) -> Result<(), NamelessError> {
     Ok(())
