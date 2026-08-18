@@ -2,6 +2,7 @@ name: rust
 
 on:
   workflow_dispatch:
+
   push:
     branches:
       - main
@@ -36,18 +37,10 @@ jobs:
         with:
           tool: nextest
 
-      - name: Run rustfmt
-        run: |
-          cargo fmt --check --all
+      - run: cargo fmt --check --all
 
-      - name: Run clippy
-        run: |
-          cargo clippy
+      - run: cargo clippy --all
 
-      - name: Run nextest
-        run: |
-          cargo nextest run --all
+      - run: cargo nextest run --all
 
-      - name: Run smoke build
-        run: |
-          cargo build
+      - run: cargo build
