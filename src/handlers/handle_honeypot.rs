@@ -1,5 +1,6 @@
 use crate::nameless_types::NamelessGlobalData;
-use crate::persistence::services::honeypot::get_honeypot_channel_id;
+use crate::persistence::model::honeypot::Honeypot;
+use crate::persistence::repository::honeypot::get_honeypot_entry;
 use poise::serenity_prelude::{ChannelId, Message};
 use std::str::FromStr;
 
@@ -11,12 +12,16 @@ pub async fn handle(
     let mut db = &data.db;
 
     if let Some(gid) = message.guild_id
-        && let Some(cid) = get_honeypot_channel_id(gid, &mut db).await
+        && let Some(Honeypot {
+            guild_id: _,
+            channel_id,
+            enabled,
+        }) = get_honeypot_entry(gid, &mut db).await
     {
         let current_channel = message.channel_id;
-        let target_channel = ChannelId::from_str(cid.as_str()).unwrap();
+        let target_channel = ChannelId::from_str(channel_id.as_str()).unwrap();
 
-        if current_channel == target_channel {
+        if enabled && current_channel == target_channel {
             gid.ban(&ctx, message.author.id, 7)
                 .await
                 .expect("Probably a privileged member.");
