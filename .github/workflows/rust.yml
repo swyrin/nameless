@@ -17,24 +17,20 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  lint-and-test:
+  rust:
     runs-on: "ubuntu-latest"
-    strategy:
-      fail-fast: false
-      matrix:
-        rust-version: [ 1.94, 1.95 ]
 
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install Rust ${{ matrix.rust-version }}
+      - name: Install Rust 1.97
         run: |
-          rustup install ${{ matrix.rust-version }} --profile default
-          rustup default ${{ matrix.rust-version }}
+          rustup install 1.97 --profile default
+          rustup default 1.97
 
       - uses: Swatinem/rust-cache@v2
         with:
-          prefix-key: "v0-rust-${{ matrix.rust-version }}"
+          prefix-key: "v0-rust-1.97"
 
       - uses: taiki-e/install-action@v2
         with:
