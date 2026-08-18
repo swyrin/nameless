@@ -35,6 +35,9 @@ impl AppConfig {
 
             x
         } else {
+            tracing::warn!("Warning: missing config file.");
+            tracing::warn!("Warning: The application should panic soon due to improper token.");
+
             Self::default()
         }
     }
