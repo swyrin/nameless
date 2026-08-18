@@ -13,10 +13,12 @@ pub async fn event_handler(
         }
 
         poise::serenity_prelude::FullEvent::Message { new_message } => {
-            if new_message.author.id != ctx.cache.current_user().id {
-                handle_honeypot::handle(new_message, ctx, data).await;
-                handle_viphurit::handle(new_message, ctx).await;
+            if new_message.author.id == ctx.cache.current_user().id {
+                return Ok(());
             }
+
+            handle_honeypot::handle(new_message, ctx, data).await;
+            handle_viphurit::handle(new_message, ctx).await;
         }
 
         poise::serenity_prelude::FullEvent::Resume { .. } => {
