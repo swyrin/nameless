@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use serde::Deserialize;
 
 use crate::config::sections::nameless_app::NamelessAppConfig;
-use crate::utils::fs::read_from_file;
+use crate::utils::fs::{exists_on_fs, read_from_file};
 
 #[derive(Deserialize, Debug, Default, Clone)]
 pub struct AppConfig {
@@ -26,10 +26,16 @@ impl AppConfig {
     /// Load `NAMELESS_CONFIG_FILE` or `nameless.toml`, whichever wins.
     pub fn load() -> Self {
         let file = std::env::var("NAMELESS_CONFIG_FILE").unwrap_or(String::from("nameless.toml"));
-        let content = read_from_file(&PathBuf::from(file));
 
-        let x: AppConfig = toml::from_str(&content).expect("Unable to parse string config.");
+        let config_path = &PathBuf::from(file);
 
-        x
+        if exists_on_fs(config_path) {
+            let content = read_from_file(config_path);
+            let x: AppConfig = toml::from_str(&content).expect("Unable to parse string config.");
+
+            x
+        } else {
+            Self::default()
+        }
     }
 }

@@ -3,6 +3,15 @@ use std::{
     path::{Path, PathBuf},
 };
 
+/// Check if path or file exists on the FS.
+#[must_use]
+pub fn exists_on_fs(file: &Path) -> bool {
+    let mut path = crate::get_cwd();
+    path.push(file);
+
+    path.exists()
+}
+
 /// Read a file, from the CWD.
 #[must_use]
 pub fn read_from_file(file: &Path) -> String {
