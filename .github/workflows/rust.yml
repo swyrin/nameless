@@ -17,6 +17,9 @@ permissions:
 env:
   CARGO_TERM_COLOR: always
   SQLX_OFFLINE: true
+  TOKEN: Discord-1234567890
+  TEST_SERVER_ID: 1234567890
+  DATABASE_URL: postgres://postgres:nameless@localhost:5432
 
 jobs:
   rust:
