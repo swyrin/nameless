@@ -1,4 +1,4 @@
-use crate::config::data::AppConfig;
+use crate::config::AppConfig;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Error, Pool, Postgres};
 
@@ -10,7 +10,7 @@ pub async fn acquire_database_connection() -> anyhow::Result<Pool<Postgres>, Err
 
     PgPoolOptions::new()
         .max_connections(32)
-        .connect(&config.get_database_url())
+        .connect(&config.database_url)
         .await
 }
 

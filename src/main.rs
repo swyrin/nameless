@@ -5,9 +5,9 @@ mod nameless_types;
 mod persistence;
 mod utils;
 
+use crate::nameless_types::NamelessGlobalData;
 use crate::persistence::connection::{acquire_database_connection, perform_database_migration};
-use crate::{nameless_types::NamelessGlobalData, utils::fs::get_cwd};
-use config::data::AppConfig;
+use config::AppConfig;
 use handlers::event_handler;
 use poise::serenity_prelude;
 use tracing_subscriber::filter::EnvFilter;
@@ -21,12 +21,8 @@ async fn main() -> anyhow::Result<()> {
         .with_env_filter(env_filter)
         .init();
 
-    let config = AppConfig::load();
-
     let pool = acquire_database_connection().await?;
     perform_database_migration(&pool).await?;
-
-    let token = config.get_token();
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
@@ -37,8 +33,10 @@ async fn main() -> anyhow::Result<()> {
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {
+            let config = AppConfig::load();
+
             Box::pin(async move {
-                match config.get_test_guild_id() {
+                match config.test_server_id {
                     Some(id) => {
                         tracing::warn!(
                             "{}",
@@ -66,8 +64,10 @@ async fn main() -> anyhow::Result<()> {
         })
         .build();
 
+    let config = AppConfig::load();
+
     let client = serenity_prelude::ClientBuilder::new(
-        token,
+        config.token,
         serenity_prelude::GatewayIntents::non_privileged()
             | serenity_prelude::GatewayIntents::MESSAGE_CONTENT,
     )
