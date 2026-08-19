@@ -1,5 +1,4 @@
--- Your SQL goes here
-
+-- Add up migration script here
 ALTER TABLE "guild"
     DROP COLUMN "honeypot_channel_id";
 

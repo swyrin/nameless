@@ -9,14 +9,14 @@ pub async fn handle(
     ctx: &poise::serenity_prelude::Context,
     data: &NamelessGlobalData,
 ) {
-    let mut db = &data.db;
+    let db = data.sql.clone();
 
     if let Some(gid) = message.guild_id
         && let Some(Honeypot {
             guild_id: _,
             channel_id,
             enabled,
-        }) = get_honeypot_entry(gid, &mut db).await
+        }) = get_honeypot_entry(gid, db).await
     {
         let current_channel = message.channel_id;
         let target_channel = ChannelId::from_str(channel_id.as_str()).unwrap();

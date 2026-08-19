@@ -1,26 +1,24 @@
 use crate::config::data::AppConfig;
-use crate::nameless_types::NamelessConnection;
-use diesel_async::{AsyncConnection, AsyncMigrationHarness};
-use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
+use sqlx::postgres::PgPoolOptions;
+use sqlx::{Error, Pool, Postgres};
 
-const MIGRATION: EmbeddedMigrations = embed_migrations!();
+/// Acquire pooled database connection from sqlx.
+pub async fn acquire_database_connection() -> anyhow::Result<Pool<Postgres>, Error> {
+    tracing::info!("Performing connection to database.");
 
-pub async fn create_database_connection() -> NamelessConnection {
     let config = AppConfig::load();
-    let db_url = config.get_database_url();
 
-    NamelessConnection::establish(&db_url)
+    PgPoolOptions::new()
+        .max_connections(32)
+        .connect(&config.get_database_url())
         .await
-        .unwrap_or_else(|_| panic!("Unable to cook a connection to {}", db_url))
 }
 
-pub async fn perform_migration() {
+/// Performing embedded migration. Trusted to be 100% hit-or-miss.
+pub async fn perform_database_migration(pool_ref: &Pool<Postgres>) -> anyhow::Result<()> {
     tracing::info!("Performing migrations.");
 
-    let connection = create_database_connection().await;
-    let mut migration_harness = AsyncMigrationHarness::new(connection);
+    sqlx::migrate!().run(pool_ref).await?;
 
-    migration_harness
-        .run_pending_migrations(MIGRATION)
-        .expect("Migration execution failed.");
+    Ok(())
 }

@@ -1,9 +1,9 @@
-use diesel_async::AsyncPgConnection;
+use sqlx::{Pool, Postgres};
 
-pub type NamelessConnection = AsyncPgConnection;
+pub type NamelessConnection = Pool<Postgres>;
 
 pub struct NamelessGlobalData {
-    pub db: NamelessConnection,
+    pub sql: NamelessConnection,
 }
 
 pub type NamelessError = Box<dyn std::error::Error + Send + Sync>;

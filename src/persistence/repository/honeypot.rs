@@ -1,39 +1,38 @@
 use std::str::FromStr;
 
-use crate::persistence::model::honeypot::{Honeypot, HoneypotUpdate};
+use crate::persistence::model::honeypot::Honeypot;
 use crate::persistence::repository::channel::ensure_exist_channel;
-use crate::persistence::schema::honeypot;
 use crate::{
     nameless_types::NamelessConnection, persistence::repository::guild::ensure_exist_guild,
 };
-use diesel::query_dsl::methods::FilterDsl;
-use diesel::{ExpressionMethods, OptionalExtension};
-use diesel_async::RunQueryDsl;
 use poise::serenity_prelude::{ChannelId, GuildId};
+use sqlx::postgres::PgQueryResult;
 
+/// Query honeypot entry.
 pub async fn get_honeypot_entry(
     guild_id: GuildId,
-    connection: &mut &NamelessConnection,
+    connection: NamelessConnection,
 ) -> Option<Honeypot> {
-    ensure_exist_guild(guild_id, connection).await;
+    ensure_exist_guild(guild_id, connection.clone()).await;
 
-    let gid = guild_id.to_string();
+    let result = sqlx::query_as!(
+        Honeypot,
+        "SELECT * FROM honeypot WHERE guild_id = $1 LIMIT 1;",
+        guild_id.to_string()
+    )
+    .fetch_optional(&connection)
+    .await
+    .expect("Unable to query a honeypot entry.");
 
-    let entry = honeypot::table
-        .filter(honeypot::guild_id.eq(gid))
-        .first::<Honeypot>(connection)
-        .await
-        .optional()
-        .expect("Unable to query a honey entry.");
-
-    entry
+    result
 }
 
+/// "Upsert" honeypot entry.
 pub async fn set_honeypot_entry(
-    new_honeypot_update: HoneypotUpdate,
-    connection: &mut &NamelessConnection,
-) {
-    let HoneypotUpdate {
+    new_honeypot_update: Honeypot,
+    connection: NamelessConnection,
+) -> PgQueryResult {
+    let Honeypot {
         guild_id,
         channel_id,
         enabled,
@@ -42,35 +41,38 @@ pub async fn set_honeypot_entry(
     let guild_id = GuildId::from_str(&guild_id).unwrap();
     let channel_id = ChannelId::from_str(&channel_id).unwrap();
 
-    ensure_exist_guild(guild_id, connection).await;
-    ensure_exist_channel(guild_id, channel_id, connection).await;
+    ensure_exist_guild(guild_id, connection.clone()).await;
+    ensure_exist_channel(guild_id, channel_id, connection.clone()).await;
 
-    let gid = guild_id.to_string();
-    let cid = channel_id.to_string();
+    let result = sqlx::query!(
+        "INSERT INTO honeypot(guild_id, channel_id, enabled)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (guild_id)
+            DO UPDATE
+            SET
+                channel_id = $2,
+                enabled = $3;",
+        guild_id.to_string(),
+        channel_id.to_string(),
+        enabled
+    )
+    .execute(&connection)
+    .await
+    .expect("Unable to update a honeypot entry.");
 
-    diesel::insert_into(honeypot::table)
-        .values((
-            honeypot::guild_id.eq(gid),
-            honeypot::channel_id.eq(cid.clone()),
-            honeypot::enabled.eq(enabled),
-        ))
-        .on_conflict(honeypot::guild_id)
-        .do_update()
-        .set((
-            honeypot::channel_id.eq(cid.clone()),
-            honeypot::enabled.eq(enabled),
-        ))
-        .execute(connection)
-        .await
-        .expect("Unable to update a honeypot entry.");
+    result
 }
 
-pub async fn delete_honeypot_entry(guild_id: GuildId, connection: &mut &NamelessConnection) {
-    ensure_exist_guild(guild_id, connection).await;
-
-    let gid = guild_id.to_string();
-
-    let entry = honeypot::table.filter(honeypot::guild_id.eq(gid));
-
-    diesel::delete(entry).execute(connection).await.unwrap();
+/// Delete honeypot entry.
+pub async fn delete_honeypot_entry(
+    guild_id: GuildId,
+    connection: NamelessConnection,
+) -> PgQueryResult {
+    sqlx::query!(
+        "DELETE FROM honeypot WHERE guild_id = $1;",
+        guild_id.to_string()
+    )
+    .execute(&connection)
+    .await
+    .expect("Unable to delete honeypot record.")
 }

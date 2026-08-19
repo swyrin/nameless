@@ -5,17 +5,27 @@ mod nameless_types;
 mod persistence;
 mod utils;
 
-use crate::persistence::connection::{create_database_connection, perform_migration};
+use crate::persistence::connection::{acquire_database_connection, perform_database_migration};
 use crate::{nameless_types::NamelessGlobalData, utils::fs::get_cwd};
 use config::data::AppConfig;
 use handlers::event_handler;
 use poise::serenity_prelude;
+use tracing_subscriber::filter::EnvFilter;
 
 #[tokio::main]
-async fn main() {
-    tracing_subscriber::fmt().with_test_writer().init();
+async fn main() -> anyhow::Result<()> {
+    let env_filter = EnvFilter::from_default_env().add_directive("sqlx::query=DEBUG".parse()?);
+
+    tracing_subscriber::fmt()
+        .with_test_writer()
+        .with_env_filter(env_filter)
+        .init();
 
     let config = AppConfig::load();
+
+    let pool = acquire_database_connection().await?;
+    perform_database_migration(&pool).await?;
+
     let token = config.get_token();
 
     let framework = poise::Framework::builder()
@@ -28,9 +38,6 @@ async fn main() {
         })
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
-                perform_migration().await;
-                let connection = create_database_connection().await;
-
                 match config.get_test_guild_id() {
                     Some(id) => {
                         tracing::warn!(
@@ -54,7 +61,7 @@ async fn main() {
                 }
 
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(NamelessGlobalData { db: connection })
+                Ok(NamelessGlobalData { sql: pool })
             })
         })
         .build();
@@ -67,5 +74,7 @@ async fn main() {
     .framework(framework)
     .await;
 
-    client.unwrap().start().await.unwrap()
+    client?.start().await?;
+
+    Ok(())
 }

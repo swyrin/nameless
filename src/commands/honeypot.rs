@@ -1,5 +1,5 @@
 use crate::nameless_types::{NamelessContext, NamelessError};
-use crate::persistence::model::honeypot::{Honeypot, HoneypotUpdate};
+use crate::persistence::model::honeypot::Honeypot;
 use crate::persistence::repository::honeypot::{
     delete_honeypot_entry, get_honeypot_entry, set_honeypot_entry,
 };
@@ -24,9 +24,9 @@ pub async fn honeypot(_: NamelessContext<'_>) -> Result<(), NamelessError> {
 #[poise::command(slash_command)]
 pub async fn get(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
     let gid = ctx.guild_id().unwrap();
-    let mut db = &ctx.data().db;
+    let db = ctx.data().sql.clone();
 
-    let entry = get_honeypot_entry(gid, &mut db).await;
+    let entry = get_honeypot_entry(gid, db).await;
 
     match entry {
         Some(Honeypot {
@@ -62,15 +62,15 @@ pub async fn set(
     #[channel_types("Text")]
     channel: serenity_prelude::GuildChannel,
 ) -> Result<(), NamelessError> {
-    let mut db = &ctx.data().db;
+    let db = ctx.data().sql.clone();
 
     set_honeypot_entry(
-        HoneypotUpdate {
+        Honeypot {
             guild_id: ctx.guild_id().unwrap().to_string(),
             channel_id: channel.id.to_string(),
             enabled: true,
         },
-        &mut db,
+        db,
     )
     .await;
 
@@ -94,9 +94,9 @@ pub async fn set(
 #[poise::command(slash_command)]
 pub async fn unset(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
     let gid = ctx.guild_id().unwrap();
-    let mut db = &ctx.data().db;
+    let db = ctx.data().sql.clone();
 
-    delete_honeypot_entry(gid, &mut db).await;
+    delete_honeypot_entry(gid, db).await;
 
     ctx.say("Done!").await?;
 
@@ -106,8 +106,8 @@ pub async fn unset(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
 /// Toggle honeypot monitoring status.
 #[poise::command(slash_command)]
 pub async fn toggle(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
-    let mut db = &ctx.data().db;
-    let entry = get_honeypot_entry(ctx.guild_id().unwrap(), &mut db).await;
+    let db = ctx.data().sql.clone();
+    let entry = get_honeypot_entry(ctx.guild_id().unwrap(), db.clone()).await;
 
     match entry {
         Some(Honeypot {
@@ -118,12 +118,12 @@ pub async fn toggle(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
             let new_enablement_state = !enabled;
 
             set_honeypot_entry(
-                HoneypotUpdate {
+                Honeypot {
                     guild_id,
                     channel_id: channel_id.clone(),
                     enabled: new_enablement_state,
                 },
-                &mut db,
+                db.clone(),
             )
             .await;
 
