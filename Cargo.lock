@@ -1471,7 +1471,6 @@ dependencies = [
  "dotenv-ng",
  "jiff",
  "poise",
- "serde",
  "sqlx",
  "tokio",
  "tracing",
