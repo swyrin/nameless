@@ -1,0 +1,79 @@
+use reqwest::blocking::get;
+
+use crate::entry::XkcdEntry;
+use crate::util::{get_xkcd_url, pick};
+
+/// Generic fetch function of an XKCD entry.
+fn fetch(number: Option<u64>) -> Result<XkcdEntry, reqwest::Error> {
+    let url = get_xkcd_url(number);
+    let resp = get(url.clone())?.error_for_status();
+
+    match resp {
+        Ok(response) => {
+            let text = response.text()?;
+            let data: XkcdEntry = serde_json::from_str(&text).unwrap();
+
+            Ok(data)
+        }
+        Err(e) => Err(e),
+    }
+}
+
+/// Fetch a specific XKCD entry.
+pub fn fetch_number(number: u64) -> Result<XkcdEntry, reqwest::Error> {
+    fetch(Some(number))
+}
+
+/// Fetch the lastest XKCD entry.
+pub fn fetch_latest() -> Result<XkcdEntry, reqwest::Error> {
+    fetch(None)
+}
+
+/// Fetch a random XKCD entry.
+pub fn fetch_random() -> Result<XkcdEntry, reqwest::Error> {
+    let latest_entry = fetch_latest();
+
+    let latest_entry = match latest_entry {
+        Ok(entry) => entry,
+        Err(_) => panic!("Should be unreachable."),
+    };
+
+    fetch(Some(pick(1..=latest_entry.num)))
+}
+
+#[cfg(test)]
+mod test {
+    // would you like a 0th of Jan
+    // when we kissed under a mistletoe at 25:71 PM?
+    use super::*;
+
+    #[test]
+    fn test_xkcd_get_url() {
+        assert_eq!(
+            get_xkcd_url(Some(2928)),
+            "https://xkcd.com/2928/info.0.json"
+        );
+
+        assert_eq!(get_xkcd_url(None), "https://xkcd.com/info.0.json");
+    }
+
+    #[test]
+    fn test_xkcd_fetch_specific() {
+        // at the time of development
+        // I found another one: https://crates.io/crates/xkcd
+        //
+        // https://xkcd.com/927/
+        assert!(fetch_number(927).is_ok());
+    }
+
+    #[test]
+    fn test_xkcd_fetch_non_existent() {
+        assert!(fetch_number(0).is_err());
+    }
+
+    #[test]
+    fn test_xkcd_fetch_guaranteed() {
+        assert!(fetch_number(1053).is_ok());
+        assert!(fetch_random().is_ok());
+    }
+}

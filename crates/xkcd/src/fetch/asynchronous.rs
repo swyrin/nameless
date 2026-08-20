@@ -1,18 +1,10 @@
-use rand::random_range;
 use reqwest::get;
 
 use crate::entry::XkcdEntry;
-
-/// Construct XKCD url.
-fn get_xkcd_url(number: Option<u32>) -> String {
-    match number {
-        Some(x) => format!("https://xkcd.com/{}/info.0.json", x),
-        None => String::from("https://xkcd.com/info.0.json"),
-    }
-}
+use crate::util::{get_xkcd_url, pick};
 
 /// Generic fetch function of an XKCD entry.
-async fn fetch(number: Option<u32>) -> anyhow::Result<XkcdEntry> {
+async fn fetch(number: Option<u64>) -> Result<XkcdEntry, reqwest::Error> {
     let url = get_xkcd_url(number);
     let resp = get(url.clone()).await?.error_for_status();
 
@@ -23,28 +15,22 @@ async fn fetch(number: Option<u32>) -> anyhow::Result<XkcdEntry> {
 
             Ok(data)
         }
-        Err(_) => anyhow::bail!(format!("Unable to fetch XKCD url {}", url.clone())),
+        Err(err) => Err(err),
     }
 }
 
 /// Fetch a specific XKCD entry.
-pub async fn fetch_number(number: u32) -> anyhow::Result<XkcdEntry> {
-    match fetch(Some(number)).await {
-        Ok(x) => Ok(x),
-        Err(e) => Err(e),
-    }
+pub async fn fetch_number(number: u64) -> Result<XkcdEntry, reqwest::Error> {
+    fetch(Some(number)).await
 }
 
 /// Fetch the lastest XKCD entry.
-pub async fn fetch_latest() -> anyhow::Result<XkcdEntry> {
-    match fetch(None).await {
-        Ok(x) => Ok(x),
-        Err(e) => Err(e),
-    }
+pub async fn fetch_latest() -> Result<XkcdEntry, reqwest::Error> {
+    fetch(None).await
 }
 
 /// Fetch a random XKCD entry.
-pub async fn fetch_random() -> anyhow::Result<XkcdEntry> {
+pub async fn fetch_random() -> Result<XkcdEntry, reqwest::Error> {
     let latest_entry = fetch_latest().await;
 
     let latest_entry = match latest_entry {
@@ -52,17 +38,7 @@ pub async fn fetch_random() -> anyhow::Result<XkcdEntry> {
         Err(_) => panic!("Should be unreachable."),
     };
 
-    let upper_bound = latest_entry.num;
-
-    let range = 1..=upper_bound;
-
-    // https://xkcd.com/221/
-    let the_chosen_one = random_range(range);
-
-    match fetch(Some(the_chosen_one)).await {
-        Ok(x) => Ok(x),
-        Err(err) => Err(err),
-    }
+    fetch(Some(pick(1..=latest_entry.num))).await
 }
 
 #[cfg(test)]

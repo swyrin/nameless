@@ -13,16 +13,23 @@ use poise::serenity_prelude;
 use tracing_subscriber::filter::EnvFilter;
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    let env_filter = EnvFilter::from_default_env().add_directive("sqlx::query=DEBUG".parse()?);
+async fn main() {
+    let env_filter = EnvFilter::from_default_env().add_directive(
+        "sqlx::query=DEBUG"
+            .parse()
+            .expect("Invalid tracing filter directive"),
+    );
 
     tracing_subscriber::fmt()
         .with_test_writer()
         .with_env_filter(env_filter)
         .init();
 
-    let pool = acquire_database_connection().await?;
-    perform_database_migration(&pool).await?;
+    let pool = acquire_database_connection()
+        .await
+        .expect("Unable to acquire database connection.");
+
+    perform_database_migration(&pool).await;
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
@@ -74,7 +81,9 @@ async fn main() -> anyhow::Result<()> {
     .framework(framework)
     .await;
 
-    client?.start().await?;
-
-    Ok(())
+    client
+        .unwrap()
+        .start()
+        .await
+        .expect("Unable to start Discord bot.");
 }

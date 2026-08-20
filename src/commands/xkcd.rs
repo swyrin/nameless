@@ -1,11 +1,11 @@
+use crate::nameless_types::{NamelessContext, NamelessError};
 use jiff::Timestamp;
 use poise::{
     CreateReply,
     serenity_prelude::{CreateActionRow, CreateButton, CreateEmbed, CreateEmbedFooter},
 };
-use xkcd_nameless::entry::XkcdEntry;
-
-use crate::nameless_types::{NamelessContext, NamelessError};
+use xkcd::entry::XkcdEntry;
+use xkcd::fetch::asynchronous::{fetch_latest, fetch_number, fetch_random};
 
 fn create_xkcd_button(entry: &XkcdEntry) -> CreateButton {
     CreateButton::new_link(format!("https://xkcd.com/{}/", entry.num)).label("See on XKCD")
@@ -55,12 +55,12 @@ pub async fn get(
     ctx: NamelessContext<'_>,
     #[description = "XKCD comic number, blank for latest."]
     #[min = 1]
-    number: Option<u32>,
+    number: Option<u64>,
 ) -> Result<(), NamelessError> {
     // https://github.com/seanmonstar/reqwest/issues/1017
     let xkcd = match number {
-        Some(num) => xkcd_nameless::fetch::fetch_number(num).await,
-        None => xkcd_nameless::fetch::fetch_latest().await,
+        Some(num) => fetch_number(num).await,
+        None => fetch_latest().await,
     }
     .expect("Unable to call XKCD API");
 
@@ -72,10 +72,7 @@ pub async fn get(
 /// Get a random XKCD comic.
 #[poise::command(slash_command)]
 pub async fn random(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
-    // https://github.com/seanmonstar/reqwest/issues/1017
-    let xkcd = xkcd_nameless::fetch::fetch_random()
-        .await
-        .expect("Unable to call XKCD API");
+    let xkcd = fetch_random().await.expect("Unable to call XKCD API");
 
     ctx.send(create_xkcd_reply(xkcd)).await.unwrap();
 
