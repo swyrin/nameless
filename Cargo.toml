@@ -5,7 +5,6 @@ edition = "2024"
 
 [workspace]
 members = [".", "crates/viphurit", "crates/xkcd"]
-default-members = ["."]
 
 [workspace.dependencies]
 tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread", "test-util"] }
