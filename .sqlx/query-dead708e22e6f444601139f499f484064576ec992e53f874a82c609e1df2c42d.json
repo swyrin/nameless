@@ -1,14 +1,10 @@
 {
-  "db_name": "PostgreSQL",
+  "db_name": "SQLite",
   "query": "INSERT INTO honeypot(guild_id, channel_id, enabled)\n            VALUES ($1, $2, $3)\n            ON CONFLICT (guild_id)\n            DO UPDATE\n            SET\n                channel_id = $2,\n                enabled = $3;",
   "describe": {
     "columns": [],
     "parameters": {
-      "Left": [
-        "Text",
-        "Text",
-        "Bool"
-      ]
+      "Right": 3
     },
     "nullable": []
   },

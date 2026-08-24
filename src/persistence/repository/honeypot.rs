@@ -6,7 +6,7 @@ use crate::{
     nameless_types::NamelessConnection, persistence::repository::guild::ensure_exist_guild,
 };
 use poise::serenity_prelude::{ChannelId, GuildId};
-use sqlx::postgres::PgQueryResult;
+use sqlx::sqlite::SqliteQueryResult;
 
 /// Query honeypot entry.
 pub async fn get_honeypot_entry(
@@ -31,7 +31,7 @@ pub async fn get_honeypot_entry(
 pub async fn set_honeypot_entry(
     new_honeypot_update: Honeypot,
     connection: NamelessConnection,
-) -> PgQueryResult {
+) -> SqliteQueryResult {
     let Honeypot {
         guild_id,
         channel_id,
@@ -67,7 +67,7 @@ pub async fn set_honeypot_entry(
 pub async fn delete_honeypot_entry(
     guild_id: GuildId,
     connection: NamelessConnection,
-) -> PgQueryResult {
+) -> SqliteQueryResult {
     sqlx::query!(
         "DELETE FROM honeypot WHERE guild_id = $1;",
         guild_id.to_string()

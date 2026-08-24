@@ -5,7 +5,7 @@ pub struct AppConfig {
     /// Discord BOT token.
     pub token: String,
 
-    /// PostgreSQL database connection url.
+    /// SQLite database connection url.
     pub database_url: String,
 
     /// Server ID of the private test server.
@@ -20,7 +20,9 @@ impl AppConfig {
 
         Self {
             token: String::from(dotenv!("TOKEN")),
-            database_url: String::from(dotenv!("DATABASE_URL")),
+            database_url: String::from(
+                option_dotenv!("DATABASE_URL").unwrap_or("sqlite:nameless.db"),
+            ),
             test_server_id: option_dotenv!("TEST_SERVER_ID").map(|value| value.parse().unwrap()),
         }
     }

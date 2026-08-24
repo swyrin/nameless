@@ -1,6 +1,6 @@
-use sqlx::{Pool, Postgres};
+use sqlx::{Pool, Sqlite};
 
-pub type NamelessConnection = Pool<Postgres>;
+pub type NamelessConnection = Pool<Sqlite>;
 
 pub struct NamelessGlobalData {
     pub sql: NamelessConnection,

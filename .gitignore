@@ -1,2 +1,5 @@
 target/
 .env
+nameless.db
+nameless.db-shm
+nameless.db-wal
