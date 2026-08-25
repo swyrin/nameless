@@ -1,5 +1,5 @@
 use crate::nameless_types::{NamelessContext, NamelessError};
-use jiff::Timestamp;
+use poise::serenity_prelude::Timestamp;
 use poise::{
     CreateReply,
     serenity_prelude::{CreateActionRow, CreateButton, CreateEmbed, CreateEmbedFooter},
@@ -20,17 +20,14 @@ fn create_xkcd_embed(entry: &XkcdEntry) -> CreateEmbed {
         day = entry.day
     );
 
-    let publishing_date: Timestamp = iso8601.parse().unwrap();
-    let epoch = publishing_date.as_second();
-
     CreateEmbed::new()
         .title(format!(
             "{num}: {title}",
             num = entry.num,
             title = entry.safe_title
         ))
-        .description(format!("Published: <t:{epoch}:d> (<t:{epoch}:R>)"))
         .image(entry.img.clone())
+        .timestamp(Timestamp::parse(&iso8601).expect("Malform ISO 8601 format."))
         .footer(CreateEmbedFooter::new(entry.alt.clone()))
 }
 
