@@ -18,17 +18,11 @@ impl AppConfig {
     pub fn load() -> Self {
         tracing::info!("Loading environment variables.");
 
-        let default_db_url = if cfg!(test) {
-            "sqlite::memory:"
-        } else {
-            "sqlite:nameless.db"
-        };
-
         Self {
             token: var("TOKEN").expect("TOKEN must be set"),
 
             database_url: var("DATABASE_URL")
-                .unwrap_or(default_db_url.to_string())
+                .unwrap_or("sqlite:nameless.db".to_string())
                 .parse()
                 .unwrap(),
 
