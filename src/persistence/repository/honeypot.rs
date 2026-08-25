@@ -76,3 +76,88 @@ pub async fn delete_honeypot_entry(
     .await
     .expect("Unable to delete honeypot record.")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::nameless_types::NamelessConnection;
+    use poise::serenity_prelude::GuildId;
+
+    #[sqlx::test]
+    async fn honeypot_nothing_burger(pool: NamelessConnection) {
+        let mock_gid = GuildId::from(1);
+        let entry = get_honeypot_entry(mock_gid, pool).await;
+
+        assert!(entry.is_none());
+    }
+
+    #[sqlx::test]
+    async fn honeypot_insertion_and_update(pool: NamelessConnection) {
+        let mock_gid = GuildId::from(1);
+
+        set_honeypot_entry(
+            Honeypot {
+                guild_id: "1".to_string(),
+                channel_id: "1".to_string(),
+                enabled: true,
+            },
+            pool.clone(),
+        )
+        .await;
+
+        let entry = get_honeypot_entry(mock_gid, pool.clone()).await;
+
+        match entry {
+            Some(exists) => {
+                assert_eq!(exists.clone().guild_id, "1");
+                assert_eq!(exists.clone().channel_id, "1");
+                assert!(exists.clone().enabled);
+            }
+            None => unreachable!(),
+        }
+
+        set_honeypot_entry(
+            Honeypot {
+                guild_id: "1".to_string(),
+                channel_id: "2".to_string(),
+                enabled: false,
+            },
+            pool.clone(),
+        )
+        .await;
+
+        let entry = get_honeypot_entry(mock_gid, pool).await;
+
+        match entry {
+            Some(exists) => {
+                assert_eq!(exists.clone().guild_id, "1");
+                assert_eq!(exists.clone().channel_id, "2");
+                assert!(!exists.clone().enabled);
+            }
+            None => unreachable!(),
+        }
+    }
+
+    #[sqlx::test]
+    async fn honeypot_deletion(pool: NamelessConnection) {
+        let mock_gid = GuildId::from(1);
+
+        set_honeypot_entry(
+            Honeypot {
+                guild_id: "1".to_string(),
+                channel_id: "1".to_string(),
+                enabled: true,
+            },
+            pool.clone(),
+        )
+        .await;
+
+        let entry = get_honeypot_entry(mock_gid, pool.clone()).await;
+        assert!(entry.is_some());
+
+        delete_honeypot_entry(mock_gid, pool.clone()).await;
+
+        let entry = get_honeypot_entry(mock_gid, pool).await;
+        assert!(entry.is_none());
+    }
+}
