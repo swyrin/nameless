@@ -1,3 +1,4 @@
+use poise::serenity_prelude::GuildId;
 use std::env::var;
 
 /// Uh... the config?
@@ -9,7 +10,7 @@ pub struct AppConfig {
     pub database_url: String,
 
     /// Server ID of the private test server.
-    pub test_server_id: Option<u64>,
+    pub test_server_id: Option<GuildId>,
 }
 
 impl AppConfig {
@@ -23,10 +24,12 @@ impl AppConfig {
 
             database_url: var("DATABASE_URL")
                 .unwrap_or("sqlite:nameless.db".to_string())
-                .parse()
-                .unwrap(),
+                .to_string(),
 
-            test_server_id: option_env!("TEST_SERVER_ID").map(|value| value.parse().unwrap()),
+            test_server_id: match var("TEST_SERVER_ID") {
+                Ok(v) => Some(v.parse::<u64>().unwrap().into()),
+                Err(_) => None,
+            },
         }
     }
 }

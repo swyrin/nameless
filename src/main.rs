@@ -20,10 +20,7 @@ async fn main() {
             .expect("Invalid tracing filter directive"),
     );
 
-    tracing_subscriber::fmt()
-        .with_test_writer()
-        .with_env_filter(env_filter)
-        .init();
+    tracing_subscriber::fmt().with_env_filter(env_filter).init();
 
     let pool = acquire_database_connection()
         .await
@@ -50,12 +47,8 @@ async fn main() {
                             format!("Command is registered locally in guild {}", id)
                         );
 
-                        poise::builtins::register_in_guild(
-                            ctx,
-                            &framework.options().commands,
-                            id.into(),
-                        )
-                        .await?
+                        poise::builtins::register_in_guild(ctx, &framework.options().commands, id)
+                            .await?
                     }
                     None => {
                         tracing::info!("Command is registered globally.");
