@@ -1,4 +1,4 @@
-use dotenv::{dotenv, option_dotenv};
+use std::env::var;
 
 /// Uh... the config?
 pub struct AppConfig {
@@ -14,16 +14,17 @@ pub struct AppConfig {
 
 impl AppConfig {
     /// Load configurations from environment variables.
-    /// You usually want to call this *after* calling [`dotenvy::dotenv`] method.
+    /// You usually want to call this *after* calling [`dotenvy::dotenv()`] method.
     pub fn load() -> Self {
         tracing::info!("Loading environment variables.");
 
         Self {
-            token: String::from(dotenv!("TOKEN")),
-            database_url: String::from(
-                option_dotenv!("DATABASE_URL").unwrap_or("sqlite:nameless.db"),
-            ),
-            test_server_id: option_dotenv!("TEST_SERVER_ID").map(|value| value.parse().unwrap()),
+            token: var("TOKEN").expect("TOKEN must be set"),
+            database_url: var("DATABASE_URL")
+                .unwrap_or("sqlite:nameless.db".to_string())
+                .parse()
+                .unwrap(),
+            test_server_id: option_env!("TEST_SERVER_ID").map(|value| value.parse().unwrap()),
         }
     }
 }

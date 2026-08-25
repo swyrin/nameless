@@ -8,12 +8,15 @@ mod utils;
 use crate::nameless_types::NamelessGlobalData;
 use crate::persistence::connection::{acquire_database_connection, perform_database_migration};
 use config::AppConfig;
+use dotenvy::dotenv;
 use handlers::event_handler;
 use poise::serenity_prelude;
 use tracing_subscriber::filter::EnvFilter;
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok();
+
     let env_filter = EnvFilter::from_default_env().add_directive(
         "sqlx::query=DEBUG"
             .parse()
