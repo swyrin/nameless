@@ -17,4 +17,9 @@ WORKDIR /nameless
 
 COPY --from=builder /nameless/target/release/nameless-ng .
 
+LABEL org.opencontainers.image.authors="swyrin"
+LABEL org.opencontainers.image.source=https://github.com/swyrin/nameless
+LABEL org.opencontainers.image.description="A Discord bot"
+LABEL org.opencontainers.image.licenses=AGPL-3.0-or-later
+
 CMD ["/nameless/nameless-ng"]

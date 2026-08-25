@@ -1,18 +1,13 @@
 name: rust
 
 on:
-  workflow_dispatch:
-
   push:
-    branches:
-      - main
-
-  pull_request:
     branches:
       - main
 
 permissions:
   contents: read
+  packages: write
 
 env:
   CARGO_TERM_COLOR: always
@@ -23,7 +18,7 @@ env:
 
 jobs:
   rust:
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v6
@@ -45,3 +40,40 @@ jobs:
       - run: cargo nextest run --all --all-features
 
       - run: cargo build
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: rust
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Publish Docker image with tag latest
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: Publish Docker image with commit tag
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+          labels: |
+            org.opencontainers.image.version=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
