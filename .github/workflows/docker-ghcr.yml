@@ -1,4 +1,4 @@
-name: rust
+name: Publish to ghcr.io
 
 on:
   push:
