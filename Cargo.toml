@@ -24,3 +24,5 @@ dotenv-ng = { version = "1.0.0", features = ["macros"] }
 strip = true
 lto = true
 panic = "abort"
+codegen-units = 1
+opt-level = "z"
