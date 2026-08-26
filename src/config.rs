@@ -24,7 +24,7 @@ impl AppConfig {
 
             database_url: var("DATABASE_URL")
                 .unwrap_or("sqlite:nameless.db".to_string())
-                .to_string(),
+                .clone(),
 
             test_server_id: match var("TEST_SERVER_ID") {
                 Ok(v) => Some(v.parse::<u64>().unwrap().into()),

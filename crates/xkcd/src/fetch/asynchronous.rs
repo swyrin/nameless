@@ -31,12 +31,7 @@ pub async fn fetch_latest() -> Result<XkcdEntry, reqwest::Error> {
 
 /// Fetch a random XKCD entry.
 pub async fn fetch_random() -> Result<XkcdEntry, reqwest::Error> {
-    let latest_entry = fetch_latest().await;
-
-    let latest_entry = match latest_entry {
-        Ok(entry) => entry,
-        Err(_) => panic!("Should be unreachable."),
-    };
+    let latest_entry = fetch_latest().await?;
 
     fetch(Some(pick(1..=latest_entry.num))).await
 }

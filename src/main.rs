@@ -40,22 +40,18 @@ async fn main() {
             let config = AppConfig::load();
 
             Box::pin(async move {
-                match config.test_server_id {
-                    Some(id) => {
-                        tracing::warn!(
-                            "{}",
-                            format!("Command is registered locally in guild {}", id)
-                        );
+                if let Some(id) = config.test_server_id {
+                    tracing::warn!(
+                        "{}",
+                        format!("Command is registered locally in guild {}", id)
+                    );
 
-                        poise::builtins::register_in_guild(ctx, &framework.options().commands, id)
-                            .await?
-                    }
-                    None => {
-                        tracing::info!("Command is registered globally.");
+                    poise::builtins::register_in_guild(ctx, &framework.options().commands, id)
+                        .await?;
+                } else {
+                    tracing::info!("Command is registered globally.");
 
-                        poise::builtins::register_globally(ctx, &framework.options().commands)
-                            .await?
-                    }
+                    poise::builtins::register_globally(ctx, &framework.options().commands).await?;
                 }
 
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;

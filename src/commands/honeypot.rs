@@ -16,6 +16,7 @@ use std::str::FromStr;
     default_member_permissions = "MANAGE_GUILD",
     required_bot_permissions = "BAN_MEMBERS"
 )]
+#[allow(clippy::unused_async, reason = "Async required by poise.")]
 pub async fn honeypot(_: NamelessContext<'_>) -> Result<(), NamelessError> {
     Ok(())
 }
@@ -36,10 +37,7 @@ pub async fn get(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
         }) => {
             let chn = ChannelId::from_str(channel_id.as_str())?;
 
-            let status = match enabled {
-                true => "is",
-                false => "IS NOT",
-            };
+            let status = if enabled { "is" } else { "IS NOT" };
 
             ctx.say(format!(
                 "The bounded honeypot channel is {chn}, and {act} watching for messages.",
@@ -127,10 +125,7 @@ pub async fn toggle(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
             )
             .await;
 
-            let status = match new_enablement_state {
-                true => "is",
-                false => "IS NOT",
-            };
+            let status = if new_enablement_state { "is" } else { "IS NOT" };
 
             let channel = ChannelId::from_str(channel_id.as_str())?;
 
@@ -141,9 +136,10 @@ pub async fn toggle(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
             ))
             .await?;
 
-            let enablement = match new_enablement_state {
-                true => "ENABLED",
-                false => "DISABLED",
+            let enablement = if new_enablement_state {
+                "ENABLED"
+            } else {
+                "DISABLED"
             };
 
             channel

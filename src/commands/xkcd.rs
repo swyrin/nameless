@@ -31,9 +31,9 @@ fn create_xkcd_embed(entry: &XkcdEntry) -> CreateEmbed {
         .footer(CreateEmbedFooter::new(entry.alt.clone()))
 }
 
-fn create_xkcd_reply(entry: XkcdEntry) -> CreateReply {
-    let embed = create_xkcd_embed(&entry);
-    let action_row = CreateActionRow::Buttons(vec![create_xkcd_button(&entry)]);
+fn create_xkcd_reply(entry: &XkcdEntry) -> CreateReply {
+    let embed = create_xkcd_embed(entry);
+    let action_row = CreateActionRow::Buttons(vec![create_xkcd_button(entry)]);
 
     CreateReply::default()
         .embed(embed)
@@ -42,6 +42,7 @@ fn create_xkcd_reply(entry: XkcdEntry) -> CreateReply {
 
 /// XKCD commands.
 #[poise::command(slash_command, subcommands("get", "random"), subcommand_required)]
+#[allow(clippy::unused_async, reason = "Async required by poise.")]
 pub async fn xkcd(_: NamelessContext<'_>) -> Result<(), NamelessError> {
     Ok(())
 }
@@ -61,7 +62,7 @@ pub async fn get(
     }
     .expect("Unable to call XKCD API");
 
-    ctx.send(create_xkcd_reply(xkcd)).await.unwrap();
+    ctx.send(create_xkcd_reply(&xkcd)).await?;
 
     Ok(())
 }
@@ -71,7 +72,7 @@ pub async fn get(
 pub async fn random(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
     let xkcd = fetch_random().await.expect("Unable to call XKCD API");
 
-    ctx.send(create_xkcd_reply(xkcd)).await.unwrap();
+    ctx.send(create_xkcd_reply(&xkcd)).await?;
 
     Ok(())
 }

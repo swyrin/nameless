@@ -4,7 +4,7 @@ use std::ops::RangeInclusive;
 /// Construct XKCD url.
 pub(crate) fn get_xkcd_url(number: Option<u64>) -> String {
     match number {
-        Some(x) => format!("https://xkcd.com/{}/info.0.json", x),
+        Some(x) => format!("https://xkcd.com/{x}/info.0.json"),
         None => String::from("https://xkcd.com/info.0.json"),
     }
 }

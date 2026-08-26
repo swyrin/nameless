@@ -9,7 +9,7 @@ pub async fn event_handler(
 ) -> Result<(), NamelessError> {
     match event {
         poise::serenity_prelude::FullEvent::Ready { .. } => {
-            tracing::info!("nameless* is ready!")
+            tracing::info!("nameless* is ready!");
         }
 
         poise::serenity_prelude::FullEvent::Message { new_message } => {
@@ -22,7 +22,7 @@ pub async fn event_handler(
         }
 
         poise::serenity_prelude::FullEvent::Resume { .. } => {
-            tracing::warn!("nameless* has just restarted!")
+            tracing::warn!("nameless* has just restarted!");
         }
 
         _ => {}

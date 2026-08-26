@@ -29,6 +29,6 @@ jobs:
 
       - run: cargo fmt --check --all
 
-      - run: cargo clippy --all
+      - run: cargo clippy -- -W clippy::all -W clippy::pedantic -A clippy::missing_errors_doc -A clippy::missing_panics_doc
 
       - run: cargo nextest run --all --all-features

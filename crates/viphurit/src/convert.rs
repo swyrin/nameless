@@ -2,13 +2,13 @@ use crate::dictionary;
 use aho_corasick::AhoCorasick;
 
 #[must_use]
-pub fn make_viphurit(input: impl ToString) -> String {
+pub fn make_viphurit(input: &(impl ToString + ?Sized)) -> String {
     let input = input.to_string();
 
     let patterns = dictionary::VIPHURIT.keys().collect::<Vec<_>>();
     let replaces = dictionary::VIPHURIT.values().collect::<Vec<_>>();
 
-    let ac = AhoCorasick::new(patterns).unwrap();
+    let ac = AhoCorasick::new(patterns).expect("Malformed dictionary.");
 
     // https://discord.com/channels/1025394048204275732/1099318720259690599/1535290571390984222
     ac.replace_all(&input, &replaces)
