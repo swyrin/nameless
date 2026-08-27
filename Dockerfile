@@ -9,7 +9,6 @@ FROM chef AS builder
 COPY --from=planner /nameless/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
-ENV SQLX_OFFLINE=1
 RUN cargo build --release
 
 FROM debian:trixie AS final

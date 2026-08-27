@@ -10,23 +10,19 @@ use crate::persistence::connection::{acquire_database_connection, perform_databa
 use config::AppConfig;
 use handlers::event_handler;
 use poise::serenity_prelude;
-use tracing_subscriber::filter::EnvFilter;
 
 #[tokio::main]
 async fn main() {
-    let env_filter = EnvFilter::from_default_env().add_directive(
-        "sqlx::query=DEBUG"
-            .parse()
-            .expect("Invalid tracing filter directive"),
-    );
-
-    tracing_subscriber::fmt().with_env_filter(env_filter).init();
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .with_test_writer()
+        .init();
 
     let pool = acquire_database_connection()
         .await
         .expect("Unable to acquire database connection.");
 
-    perform_database_migration(&pool).await;
+    let _ = perform_database_migration(&pool).await;
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {

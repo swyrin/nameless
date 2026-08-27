@@ -1,13 +1,36 @@
-use crate::nameless_types::NamelessConnection;
+use crate::persistence::model::guild;
 use poise::serenity_prelude::GuildId;
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, IntoActiveModel, QueryFilter};
 
-/// Ensure guild record exists. Yes, upsert at home.
-pub async fn ensure_exist_guild(guild_id: GuildId, connection: NamelessConnection) {
-    sqlx::query!(
-        "INSERT INTO guild (id) VALUES ($1) ON CONFLICT DO NOTHING;",
-        guild_id.to_string()
-    )
-    .execute(&connection)
-    .await
-    .expect("Unable to insert guild entry");
+/// Get guild record.
+pub async fn get_guild(id: GuildId, connection: &DatabaseConnection) -> Option<guild::Model> {
+    guild::Entity::find_by_id(id.to_string())
+        .one(connection)
+        .await
+        .expect("Unable to perform guild retrieval.")
+}
+
+/// Insert guild record.
+pub async fn insert_guild(
+    data: guild::ActiveModel,
+    connection: &DatabaseConnection,
+) -> guild::Model {
+    guild::Entity::insert(data)
+        .exec_with_returning(connection)
+        .await
+        .expect("Unable to perform guild insertion.")
+}
+
+/// Update guild record.
+pub async fn update_guild(
+    id: GuildId,
+    data: impl IntoActiveModel<guild::ActiveModel>,
+    connection: &DatabaseConnection,
+) -> Vec<guild::Model> {
+    guild::Entity::update_many()
+        .set(data.into_active_model())
+        .filter(guild::Column::Id.eq(id.to_string()))
+        .exec_with_returning(connection)
+        .await
+        .expect("Unable to perform guild update.")
 }

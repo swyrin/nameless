@@ -1,22 +1,26 @@
 use crate::config::AppConfig;
-use crate::nameless_types::NamelessConnection;
-use sqlx::Error;
+use sea_orm::{ConnectOptions, Database, DatabaseConnection, DbErr};
 
-/// Acquire pooled database connection from sqlx.
-pub async fn acquire_database_connection() -> Result<NamelessConnection, Error> {
+/// Acquire database connection.
+pub async fn acquire_database_connection() -> Result<DatabaseConnection, DbErr> {
     tracing::info!("Performing connection to database.");
 
     let config = AppConfig::load();
+    let mut opt = ConnectOptions::new(&config.database_url);
+    opt.sqlx_logging(false);
 
-    NamelessConnection::connect(&config.database_url).await
+    Database::connect(opt).await
 }
 
-/// Performing embedded migration. Trusted to be 100% hit-or-miss.
-pub async fn perform_database_migration(pool_ref: &NamelessConnection) {
+/// Performing embedded migration. 100% hit-or-miss.
+pub async fn perform_database_migration(conn: &DatabaseConnection) -> Result<(), DbErr> {
     tracing::info!("Performing migrations.");
 
-    sqlx::migrate!()
-        .run(pool_ref)
-        .await
-        .expect("Unable to perform database migration.");
+    conn.get_schema_registry("nameless_ng::*")
+        .sync(conn)
+        .await?;
+
+    tracing::info!("Done performing migrations.");
+
+    Ok(())
 }

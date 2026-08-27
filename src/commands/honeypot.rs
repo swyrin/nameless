@@ -1,17 +1,17 @@
 use crate::nameless_types::{NamelessContext, NamelessError};
-use crate::persistence::model::honeypot::Honeypot;
-use crate::persistence::repository::honeypot::{
-    delete_honeypot_entry, get_honeypot_entry, set_honeypot_entry,
-};
+use crate::persistence::model::guild;
+use crate::persistence::model::guild::GuildHoneypotUpdatePayload;
+use crate::persistence::repository::guild::{get_guild, insert_guild, update_guild};
 use poise::serenity_prelude;
 use poise::serenity_prelude::{ChannelId, Mentionable};
+use sea_orm::Set;
 use std::str::FromStr;
 
 /// Honeypot commands.
 #[poise::command(
     guild_only,
     slash_command,
-    subcommands("get", "set", "unset", "toggle"),
+    subcommands("get", "set", "unset"),
     subcommand_required,
     default_member_permissions = "MANAGE_GUILD",
     required_bot_permissions = "BAN_MEMBERS"
@@ -21,38 +21,30 @@ pub async fn honeypot(_: NamelessContext<'_>) -> Result<(), NamelessError> {
     Ok(())
 }
 
-/// Get the bound honeypot channel & its status.
+/// Get the bound honeypot channel.
 #[poise::command(slash_command)]
 pub async fn get(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
     let gid = ctx.guild_id().unwrap();
     let db = ctx.data().sql.clone();
 
-    let entry = get_honeypot_entry(gid, db).await;
+    if let Some(record) = get_guild(gid, &db).await
+        && let Some(honeypot_chn) = record.honeypot_channel
+    {
+        let channel_id = ChannelId::from_str(&honeypot_chn)?;
 
-    match entry {
-        Some(Honeypot {
-            guild_id: _,
-            channel_id,
-            enabled,
-        }) => {
-            let chn = ChannelId::from_str(channel_id.as_str())?;
-
-            let status = if enabled { "is" } else { "IS NOT" };
-
-            ctx.say(format!(
-                "The bounded honeypot channel is {chn}, and {act} watching for messages.",
-                chn = chn.mention(),
-                act = status
-            ))
-            .await?
-        }
-        None => ctx.say("Nothing is bound").await?,
+        ctx.say(format!(
+            "The bounded honeypot channel is {chn}.",
+            chn = channel_id.mention()
+        ))
+        .await?;
+    } else {
+        ctx.say("Nothing is bound").await?;
     };
 
     Ok(())
 }
 
-/// Bind a honeypot channel. This will reset the monitoring status.
+/// Bind a honeypot channel.
 #[poise::command(slash_command)]
 pub async fn set(
     ctx: NamelessContext<'_>,
@@ -60,30 +52,34 @@ pub async fn set(
     #[channel_types("Text")]
     channel: serenity_prelude::GuildChannel,
 ) -> Result<(), NamelessError> {
+    let gid = ctx.guild_id().unwrap();
     let db = ctx.data().sql.clone();
 
-    set_honeypot_entry(
-        Honeypot {
-            guild_id: ctx.guild_id().unwrap().to_string(),
-            channel_id: channel.id.to_string(),
-            enabled: true,
-        },
-        db,
-    )
-    .await;
+    if get_guild(gid, &db).await.is_some() {
+        update_guild(
+            gid,
+            GuildHoneypotUpdatePayload {
+                honeypot_channel: Some(Some(channel.id.to_string())),
+            },
+            &db,
+        )
+        .await;
+    } else {
+        insert_guild(
+            guild::ActiveModel {
+                id: Set(gid.to_string()),
+                honeypot_channel: Set(Some(channel.id.to_string())),
+            },
+            &db,
+        )
+        .await;
+    };
 
     ctx.say(format!(
         "Successfully bound honeypot channel to {}",
         channel.mention()
     ))
     .await?;
-
-    channel
-        .say(
-            &ctx,
-            "This channel has been bound as the guild's honeypot channel.",
-        )
-        .await?;
 
     Ok(())
 }
@@ -94,65 +90,22 @@ pub async fn unset(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
     let gid = ctx.guild_id().unwrap();
     let db = ctx.data().sql.clone();
 
-    delete_honeypot_entry(gid, db).await;
+    if get_guild(gid, &db).await.is_some() {
+        update_guild(
+            gid,
+            GuildHoneypotUpdatePayload {
+                honeypot_channel: Some(None),
+            },
+            &db,
+        )
+        .await;
 
-    ctx.say("Done!").await?;
-
-    Ok(())
-}
-
-/// Toggle honeypot monitoring status.
-#[poise::command(slash_command)]
-pub async fn toggle(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
-    let db = ctx.data().sql.clone();
-    let entry = get_honeypot_entry(ctx.guild_id().unwrap(), db.clone()).await;
-
-    match entry {
-        Some(Honeypot {
-            guild_id,
-            channel_id,
-            enabled,
-        }) => {
-            let new_enablement_state = !enabled;
-
-            set_honeypot_entry(
-                Honeypot {
-                    guild_id,
-                    channel_id: channel_id.clone(),
-                    enabled: new_enablement_state,
-                },
-                db.clone(),
-            )
-            .await;
-
-            let status = if new_enablement_state { "is" } else { "IS NOT" };
-
-            let channel = ChannelId::from_str(channel_id.as_str())?;
-
-            ctx.say(format!(
-                "Now {chn} {act} watching for messages.",
-                chn = channel.mention(),
-                act = status
-            ))
+        ctx.say("This guild no longer has honeypot channel.")
             .await?;
-
-            let enablement = if new_enablement_state {
-                "ENABLED"
-            } else {
-                "DISABLED"
-            };
-
-            channel
-                .say(
-                    &ctx,
-                    format!("This channel's honeypot monitoring is now {enablement}."),
-                )
-                .await?;
-        }
-        None => {
-            ctx.say("This guild has no bound honeypot channel!").await?;
-        }
-    }
+    } else {
+        ctx.say("This guild has no bounded honeypot channel.")
+            .await?;
+    };
 
     Ok(())
 }

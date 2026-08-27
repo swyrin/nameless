@@ -12,9 +12,9 @@ tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread", "test-uti
 [dependencies]
 poise = "0.6.2"
 tokio = { workspace = true }
-sqlx = { version = "0.9.0", features = ["runtime-tokio", "sqlite", "migrate"] }
+sea-orm = { version = "2.0.2", features = ["sqlx-sqlite", "runtime-tokio", "debug-print", "entity-registry", "schema-sync"] }
 tracing = "0.1.44"
-tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+tracing-subscriber = "0.3.23"
 viphurit = { path = "crates/viphurit" }
 xkcd = { path = "crates/xkcd" }
 

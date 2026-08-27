@@ -1,9 +1,7 @@
-use sqlx::{Pool, Sqlite};
-
-pub type NamelessConnection = Pool<Sqlite>;
+use sea_orm::DatabaseConnection;
 
 pub struct NamelessGlobalData {
-    pub sql: NamelessConnection,
+    pub sql: DatabaseConnection,
 }
 
 pub type NamelessError = Box<dyn std::error::Error + Send + Sync>;
