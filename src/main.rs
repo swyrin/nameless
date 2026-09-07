@@ -22,7 +22,7 @@ async fn main() {
         .await
         .expect("Unable to acquire database connection.");
 
-    let _ = perform_database_migration(&pool).await;
+    perform_database_migration(&pool).await;
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
@@ -58,17 +58,14 @@ async fn main() {
 
     let config = AppConfig::load();
 
-    let client = serenity_prelude::ClientBuilder::new(
+    let mut client = serenity_prelude::ClientBuilder::new(
         config.token,
         serenity_prelude::GatewayIntents::non_privileged()
             | serenity_prelude::GatewayIntents::MESSAGE_CONTENT,
     )
     .framework(framework)
-    .await;
+    .await
+    .unwrap();
 
-    client
-        .unwrap()
-        .start()
-        .await
-        .expect("Unable to start Discord bot.");
+    client.start().await.expect("Unable to start Discord bot.");
 }

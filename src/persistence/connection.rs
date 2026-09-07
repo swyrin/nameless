@@ -13,14 +13,13 @@ pub async fn acquire_database_connection() -> Result<DatabaseConnection, DbErr> 
 }
 
 /// Performing embedded migration. 100% hit-or-miss.
-pub async fn perform_database_migration(conn: &DatabaseConnection) -> Result<(), DbErr> {
+pub async fn perform_database_migration(conn: &DatabaseConnection) {
     tracing::info!("Performing migrations.");
 
     conn.get_schema_registry("nameless_ng::*")
         .sync(conn)
-        .await?;
+        .await
+        .expect("Failure in database schema migration.");
 
     tracing::info!("Done performing migrations.");
-
-    Ok(())
 }
