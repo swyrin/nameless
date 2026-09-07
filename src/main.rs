@@ -1,12 +1,12 @@
 mod commands;
 mod config;
 mod handlers;
-mod nameless_types;
 mod persistence;
+mod types;
 mod utils;
 
-use crate::nameless_types::NamelessGlobalData;
 use crate::persistence::connection::{acquire_database_connection, perform_database_migration};
+use crate::types::NamelessGlobalData;
 use config::AppConfig;
 use handlers::event_handler;
 use poise::serenity_prelude;
@@ -27,9 +27,7 @@ async fn main() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: vec![commands::honeypot::honeypot(), commands::xkcd::xkcd()],
-            event_handler: |ctx, event, fx, data| {
-                Box::pin(event_handler::event_handler(ctx, event, fx, data))
-            },
+            event_handler: |ctx, event| Box::pin(event_handler::event_handler(ctx, event)),
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {

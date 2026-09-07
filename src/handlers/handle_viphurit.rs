@@ -1,7 +1,12 @@
+use crate::types::{NamelessError, NamelessGlobalData};
 use crate::utils::make_viphurit::make_viphurit;
+use poise::FrameworkContext;
 use poise::serenity_prelude::Message;
 
-pub async fn handle(message: &Message, ctx: &poise::serenity_prelude::Context) {
+pub async fn handle(
+    message: &Message,
+    framework: &FrameworkContext<'_, NamelessGlobalData, NamelessError>,
+) {
     let original_message = message.content.clone();
     let fixed_message = make_viphurit(&original_message.clone()).clone();
     let has_replacements = original_message != fixed_message;
@@ -14,6 +19,10 @@ pub async fn handle(message: &Message, ctx: &poise::serenity_prelude::Context) {
         "
         );
 
-        message.channel_id.say(&ctx, fixed_message).await.unwrap();
+        message
+            .channel_id
+            .say(&framework.serenity_context, fixed_message)
+            .await
+            .unwrap();
     }
 }

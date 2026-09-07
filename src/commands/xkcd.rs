@@ -1,4 +1,4 @@
-use crate::nameless_types::{NamelessContext, NamelessError};
+use crate::types::{NamelessContext, NamelessError};
 use poise::serenity_prelude::Timestamp;
 use poise::{
     CreateReply,

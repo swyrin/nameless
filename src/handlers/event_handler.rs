@@ -1,12 +1,13 @@
 use crate::handlers::{handle_honeypot, handle_viphurit};
-use crate::nameless_types::{NamelessError, NamelessGlobalData};
+use crate::types::{NamelessError, NamelessGlobalData};
+use poise::FrameworkContext;
 
 pub async fn event_handler(
-    ctx: &poise::serenity_prelude::Context,
+    framework: FrameworkContext<'_, NamelessGlobalData, NamelessError>,
     event: &poise::serenity_prelude::FullEvent,
-    _framework: poise::FrameworkContext<'_, NamelessGlobalData, NamelessError>,
-    data: &NamelessGlobalData,
 ) -> Result<(), NamelessError> {
+    let ctx = framework.serenity_context;
+
     match event {
         poise::serenity_prelude::FullEvent::Ready { .. } => {
             tracing::info!("nameless* is ready!");
@@ -17,8 +18,8 @@ pub async fn event_handler(
                 return Ok(());
             }
 
-            handle_honeypot::handle(new_message, ctx, data).await;
-            handle_viphurit::handle(new_message, ctx).await;
+            handle_honeypot::handle(new_message, &framework).await;
+            handle_viphurit::handle(new_message, &framework).await;
         }
 
         poise::serenity_prelude::FullEvent::Resume { .. } => {

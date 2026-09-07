@@ -1,7 +1,7 @@
-use crate::nameless_types::{NamelessContext, NamelessError};
 use crate::persistence::model::guild;
 use crate::persistence::model::guild::GuildHoneypotUpdatePayload;
 use crate::persistence::repository::guild::{get_guild, insert_guild, update_guild};
+use crate::types::{NamelessContext, NamelessError};
 use poise::serenity_prelude;
 use poise::serenity_prelude::{ChannelId, Mentionable};
 use sea_orm::Set;
