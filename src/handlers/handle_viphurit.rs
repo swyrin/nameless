@@ -1,5 +1,5 @@
+use crate::utils::make_viphurit::make_viphurit;
 use poise::serenity_prelude::Message;
-use viphurit::convert::make_viphurit;
 
 pub async fn handle(message: &Message, ctx: &poise::serenity_prelude::Context) {
     let original_message = message.content.clone();
