@@ -1,9 +1,7 @@
-use aho_corasick::AhoCorasick;
-
 use std::{collections::HashMap, sync::LazyLock};
 
 /// vip
-pub static VIPHURIT: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(|| {
+static VIPHURIT: LazyLock<HashMap<&str, &str>> = LazyLock::new(|| {
     HashMap::from([
         ("v1p", "Vip(hurit)"),
         ("vip", "Vip(hurit)"),
@@ -80,13 +78,18 @@ pub static VIPHURIT: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::n
 pub fn make_viphurit(input: &(impl ToString + ?Sized)) -> String {
     let input = input.to_string();
 
-    let patterns = VIPHURIT.keys().collect::<Vec<_>>();
-    let replaces = VIPHURIT.values().collect::<Vec<_>>();
-
-    let ac = AhoCorasick::new(patterns).expect("Malformed dictionary.");
-
     // https://discord.com/channels/1025394048204275732/1099318720259690599/1535290571390984222
-    ac.replace_all(&input, &replaces)
+    input
+        .split_whitespace()
+        .map(|mut word| {
+            if let Some(replace) = VIPHURIT.get(word) {
+                word = *replace;
+            }
+
+            word
+        })
+        .collect::<Vec<&str>>()
+        .join(" ")
 }
 
 #[cfg(test)]

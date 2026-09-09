@@ -1694,7 +1694,6 @@ dependencies = [
 name = "nameless-ng"
 version = "0.1.0"
 dependencies = [
- "aho-corasick",
  "poise",
  "sea-orm",
  "tokio",
