@@ -111,7 +111,7 @@ mod test {
 
     #[test]
     fn vip_preserve_og() {
-        assert_eq!(make_viphurit("Vip(hurit)"), "Vip(hurit)");
+        assert_eq!(make_viphurit("Vip(hurit) la nhat"), "Vip(hurit) la nhat");
     }
 
     #[test]
