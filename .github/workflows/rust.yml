@@ -1,4 +1,4 @@
-name: Sanity check
+name: Sanity check (Nightly Rust)
 
 on:
   pull_request:
@@ -17,7 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - run: rustup default nightly
+      - run: |
+          rustup default nightly
+          rustup component add rustfmt
 
       - uses: Swatinem/rust-cache@v2
 
