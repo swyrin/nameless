@@ -82,7 +82,10 @@ pub fn make_viphurit(input: &(impl ToString + ?Sized)) -> String {
     input
         .split_whitespace()
         .map(|mut word| {
-            if let Some(replace) = VIPHURIT.get(word) {
+            let lower = word.to_lowercase();
+            let lower = lower.as_str();
+
+            if let Some(replace) = VIPHURIT.get(lower) {
                 word = *replace;
             }
 
@@ -114,5 +117,11 @@ mod test {
     #[test]
     fn vip_prevent_overlaps() {
         assert_ne!(make_viphurit("Shyloadcc"), "cccc");
+    }
+
+    #[test]
+    fn vip_case_insensitive() {
+        assert_eq!(make_viphurit("vip"), "Vip(hurit)");
+        assert_eq!(make_viphurit("Vip"), "Vip(hurit)");
     }
 }
