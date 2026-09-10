@@ -15,6 +15,7 @@ RUN cargo build --release
 FROM debian:trixie AS final
 WORKDIR /nameless
 
+RUN apt-get update && apt-get install -y ca-certificates libopus-dev --no-install-recommends
 COPY --from=builder /nameless/target/release/nameless-ng .
 
 CMD ["/nameless/nameless-ng"]
