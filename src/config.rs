@@ -23,7 +23,10 @@ impl AppConfig {
         Self {
             token: var("TOKEN").expect("TOKEN must be set"),
 
-            database_url: var("DATABASE_URL").unwrap_or("sqlite:nameless.db".to_string()).clone(),
+            // FIXME: https://www.sqlite.org/uri.html#:~:text=ro%0Amode%3Drw-,mode%3Drwc,-mode%3Dmemory
+            database_url: var("DATABASE_URL")
+                .unwrap_or("sqlite:nameless.db?mode=rwc".to_string())
+                .clone(),
 
             test_server_id: match var("TEST_SERVER_ID") {
                 Ok(v) => Some(v.parse::<u64>().unwrap().into()),
