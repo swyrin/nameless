@@ -7,7 +7,7 @@ RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef AS builder
 COPY --from=planner /nameless/recipe.json recipe.json
-RUN apt-get update && apt-get install -y build-essential autoconf automake libtool m4 libopus-dev
+RUN apt-get update && apt-get install -y build-essential autoconf automake libtool m4 libopus-dev --no-install-recommends
 RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
 RUN cargo build --release
