@@ -1,6 +1,7 @@
-use crate::persistence::model::guild;
 use poise::serenity_prelude::GuildId;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, IntoActiveModel, QueryFilter};
+
+use crate::persistence::model::guild;
 
 /// Get guild record.
 pub async fn get_guild(id: GuildId, connection: &DatabaseConnection) -> Option<guild::Model> {

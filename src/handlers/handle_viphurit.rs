@@ -1,7 +1,8 @@
-use crate::types::{CommandData, CommandError};
-use crate::utils::make_viphurit::make_viphurit;
 use poise::FrameworkContext;
 use poise::serenity_prelude::Message;
+
+use crate::types::{CommandData, CommandError};
+use crate::utils::make_viphurit::make_viphurit;
 
 pub async fn handle(
     message: &Message,
@@ -19,10 +20,6 @@ pub async fn handle(
         "
         );
 
-        message
-            .channel_id
-            .say(&framework.serenity_context, fixed_message)
-            .await
-            .unwrap();
+        message.channel_id.say(&framework.serenity_context, fixed_message).await.unwrap();
     }
 }

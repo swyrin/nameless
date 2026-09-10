@@ -1,8 +1,10 @@
-use crate::persistence::repository::guild::get_guild;
-use crate::types::{CommandData, CommandError};
+use std::str::FromStr;
+
 use poise::FrameworkContext;
 use poise::serenity_prelude::{ChannelId, Message};
-use std::str::FromStr;
+
+use crate::persistence::repository::guild::get_guild;
+use crate::types::{CommandData, CommandError};
 
 pub async fn handle(
     message: &Message,

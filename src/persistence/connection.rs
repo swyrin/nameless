@@ -1,5 +1,6 @@
-use crate::config::AppConfig;
 use sea_orm::{ConnectOptions, Database, DatabaseConnection, DbErr};
+
+use crate::config::AppConfig;
 
 /// Acquire database connection.
 pub async fn acquire_database_connection() -> Result<DatabaseConnection, DbErr> {

@@ -1,5 +1,6 @@
-use rand::random_range;
 use std::ops::RangeInclusive;
+
+use rand::random_range;
 
 /// Construct XKCD url.
 pub(crate) fn get_xkcd_url(number: Option<u64>) -> String {
@@ -10,7 +11,6 @@ pub(crate) fn get_xkcd_url(number: Option<u64>) -> String {
 }
 
 /// Pick a number in range.
-///
 // https://xkcd.com/221/
 pub(crate) fn pick(range: RangeInclusive<u64>) -> u64 {
     random_range(range)

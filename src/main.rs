@@ -6,23 +6,19 @@ mod persistence;
 mod types;
 mod utils;
 
-use crate::persistence::connection::{acquire_database_connection, perform_database_migration};
-use crate::types::CommandData;
-use config::AppConfig;
-use handlers::event_handler;
 use poise::serenity_prelude;
 use songbird::SerenityInit;
 
+use crate::config::AppConfig;
+use crate::handlers::event_handler;
+use crate::persistence::connection::{acquire_database_connection, perform_database_migration};
+use crate::types::CommandData;
+
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::DEBUG)
-        .with_test_writer()
-        .init();
+    tracing_subscriber::fmt().with_max_level(tracing::Level::DEBUG).with_test_writer().init();
 
-    let pool = acquire_database_connection()
-        .await
-        .expect("Unable to acquire database connection.");
+    let pool = acquire_database_connection().await.expect("Unable to acquire database connection.");
 
     perform_database_migration(&pool).await;
 
@@ -37,10 +33,7 @@ async fn main() {
 
             Box::pin(async move {
                 if let Some(id) = config.test_server_id {
-                    tracing::warn!(
-                        "{}",
-                        format!("Command is registered locally in guild {}", id)
-                    );
+                    tracing::warn!("{}", format!("Command is registered locally in guild {}", id));
 
                     poise::builtins::register_in_guild(ctx, &framework.options().commands, id)
                         .await?;
@@ -51,7 +44,9 @@ async fn main() {
                 }
 
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(CommandData { db: pool })
+                Ok(CommandData {
+                    db: pool,
+                })
             })
         })
         .build();

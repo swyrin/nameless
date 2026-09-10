@@ -17,11 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - run: rustup default stable
+      - run: rustup default nightly
 
       - uses: Swatinem/rust-cache@v2
-        with:
-          prefix-key: "v0-rust-1.97"
 
       - uses: taiki-e/install-action@v2
         with:
@@ -29,6 +27,6 @@ jobs:
 
       - run: cargo fmt --check --all
 
-      - run: cargo clippy -- -W clippy::all -W clippy::pedantic -A clippy::missing_errors_doc -A clippy::missing_panics_doc
+      - run: cargo clippy
 
       - run: cargo nextest run --all --all-features

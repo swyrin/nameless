@@ -1,11 +1,15 @@
+use poise::CreateReply;
+use poise::serenity_prelude::{
+    CreateActionRow,
+    CreateButton,
+    CreateEmbed,
+    CreateEmbedFooter,
+    Timestamp,
+};
+
 use crate::extra::xkcd::entry::XkcdEntry;
 use crate::extra::xkcd::fetch::{fetch_latest, fetch_number, fetch_random};
 use crate::types::{CommandContext, CommandError};
-use poise::serenity_prelude::Timestamp;
-use poise::{
-    CreateReply,
-    serenity_prelude::{CreateActionRow, CreateButton, CreateEmbed, CreateEmbedFooter},
-};
 
 fn create_xkcd_button(entry: &XkcdEntry) -> CreateButton {
     CreateButton::new_link(format!("https://xkcd.com/{}/", entry.num)).label("See on XKCD")
@@ -21,11 +25,7 @@ fn create_xkcd_embed(entry: &XkcdEntry) -> CreateEmbed {
     );
 
     CreateEmbed::new()
-        .title(format!(
-            "{num}: {title}",
-            num = entry.num,
-            title = entry.safe_title
-        ))
+        .title(format!("{num}: {title}", num = entry.num, title = entry.safe_title))
         .image(entry.img.clone())
         .timestamp(Timestamp::parse(&iso8601).expect("Malform ISO 8601 format."))
         .footer(CreateEmbedFooter::new(entry.alt.clone()))
@@ -35,9 +35,7 @@ fn create_xkcd_reply(entry: &XkcdEntry) -> CreateReply {
     let embed = create_xkcd_embed(entry);
     let action_row = CreateActionRow::Buttons(vec![create_xkcd_button(entry)]);
 
-    CreateReply::default()
-        .embed(embed)
-        .components(vec![action_row])
+    CreateReply::default().embed(embed).components(vec![action_row])
 }
 
 /// XKCD commands.

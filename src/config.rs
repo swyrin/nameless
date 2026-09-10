@@ -1,5 +1,6 @@
-use poise::serenity_prelude::GuildId;
 use std::env::var;
+
+use poise::serenity_prelude::GuildId;
 
 /// Uh... the config?
 pub struct AppConfig {
@@ -22,9 +23,7 @@ impl AppConfig {
         Self {
             token: var("TOKEN").expect("TOKEN must be set"),
 
-            database_url: var("DATABASE_URL")
-                .unwrap_or("sqlite:nameless.db".to_string())
-                .clone(),
+            database_url: var("DATABASE_URL").unwrap_or("sqlite:nameless.db".to_string()).clone(),
 
             test_server_id: match var("TEST_SERVER_ID") {
                 Ok(v) => Some(v.parse::<u64>().unwrap().into()),

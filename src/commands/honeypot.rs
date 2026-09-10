@@ -1,11 +1,13 @@
+use std::str::FromStr;
+
+use poise::serenity_prelude;
+use poise::serenity_prelude::{ChannelId, Mentionable};
+use sea_orm::Set;
+
 use crate::persistence::model::guild;
 use crate::persistence::model::guild::GuildHoneypotUpdatePayload;
 use crate::persistence::repository::guild::{get_guild, insert_guild, update_guild};
 use crate::types::{CommandContext, CommandError};
-use poise::serenity_prelude;
-use poise::serenity_prelude::{ChannelId, Mentionable};
-use sea_orm::Set;
-use std::str::FromStr;
 
 /// Honeypot commands.
 #[poise::command(
@@ -32,14 +34,11 @@ pub async fn get(ctx: CommandContext<'_>) -> Result<(), CommandError> {
     {
         let channel_id = ChannelId::from_str(&honeypot_chn)?;
 
-        ctx.say(format!(
-            "The bounded honeypot channel is {chn}.",
-            chn = channel_id.mention()
-        ))
-        .await?;
+        ctx.say(format!("The bounded honeypot channel is {chn}.", chn = channel_id.mention()))
+            .await?;
     } else {
         ctx.say("Nothing is bound").await?;
-    };
+    }
 
     Ok(())
 }
@@ -73,13 +72,9 @@ pub async fn set(
             &db,
         )
         .await;
-    };
+    }
 
-    ctx.say(format!(
-        "Successfully bound honeypot channel to {}",
-        channel.mention()
-    ))
-    .await?;
+    ctx.say(format!("Successfully bound honeypot channel to {}", channel.mention())).await?;
 
     Ok(())
 }
@@ -100,12 +95,10 @@ pub async fn unset(ctx: CommandContext<'_>) -> Result<(), CommandError> {
         )
         .await;
 
-        ctx.say("This guild no longer has honeypot channel.")
-            .await?;
+        ctx.say("This guild no longer has honeypot channel.").await?;
     } else {
-        ctx.say("This guild has no bounded honeypot channel.")
-            .await?;
-    };
+        ctx.say("This guild has no bounded honeypot channel.").await?;
+    }
 
     Ok(())
 }

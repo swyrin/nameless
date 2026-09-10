@@ -1,4 +1,5 @@
-use std::{collections::HashMap, sync::LazyLock};
+use std::collections::HashMap;
+use std::sync::LazyLock;
 
 /// vip
 static VIPHURIT: LazyLock<HashMap<&str, &str>> = LazyLock::new(|| {

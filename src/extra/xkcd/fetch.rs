@@ -1,9 +1,7 @@
 use reqwest::get;
 
-use crate::extra::xkcd::{
-    entry::XkcdEntry,
-    util::{get_xkcd_url, pick},
-};
+use crate::extra::xkcd::entry::XkcdEntry;
+use crate::extra::xkcd::util::{get_xkcd_url, pick};
 
 /// Generic fetch function of an XKCD entry.
 async fn fetch(number: Option<u64>) -> Result<XkcdEntry, reqwest::Error> {
@@ -16,7 +14,7 @@ async fn fetch(number: Option<u64>) -> Result<XkcdEntry, reqwest::Error> {
             let data: XkcdEntry = serde_json::from_str(&text).unwrap();
 
             Ok(data)
-        }
+        },
         Err(err) => Err(err),
     }
 }
@@ -46,10 +44,7 @@ mod test {
 
     #[tokio::test]
     async fn test_xkcd_get_url() {
-        assert_eq!(
-            get_xkcd_url(Some(2928)),
-            "https://xkcd.com/2928/info.0.json"
-        );
+        assert_eq!(get_xkcd_url(Some(2928)), "https://xkcd.com/2928/info.0.json");
 
         assert_eq!(get_xkcd_url(None), "https://xkcd.com/info.0.json");
     }
