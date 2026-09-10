@@ -1,7 +1,9 @@
 use reqwest::get;
 
-use crate::entry::XkcdEntry;
-use crate::util::{get_xkcd_url, pick};
+use crate::extra::xkcd::{
+    entry::XkcdEntry,
+    util::{get_xkcd_url, pick},
+};
 
 /// Generic fetch function of an XKCD entry.
 async fn fetch(number: Option<u64>) -> Result<XkcdEntry, reqwest::Error> {

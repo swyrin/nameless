@@ -1,5 +1,6 @@
 mod commands;
 mod config;
+mod extra;
 mod handlers;
 mod persistence;
 mod types;

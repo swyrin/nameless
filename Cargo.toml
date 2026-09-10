@@ -3,33 +3,36 @@ name = "nameless-ng"
 version = "0.1.0"
 edition = "2024"
 
-[workspace]
-members = [".", "crates/xkcd"]
-
-[workspace.dependencies]
-tokio = { version = "1.53.1", features = [
+[dependencies]
+poise = "0.7.0"
+rand = "0.10.2"
+reqwest = "0.13.5"
+sea-orm = {
+  version = "2.0.2",
+  features = [
+    "debug-print",
+    "entity-registry",
+    "runtime-tokio",
+    "schema-sync",
+    "sqlx-sqlite",
+  ]
+}
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+tokio = {
+  version = "1.53.1",
+  features = [
     "macros",
     "rt-multi-thread",
     "test-util",
-] }
-
-[dependencies]
-poise = "0.7.0"
-sea-orm = { version = "2.0.2", features = [
-    "sqlx-sqlite",
-    "runtime-tokio",
-    "debug-print",
-    "entity-registry",
-    "schema-sync",
-] }
+  ]
+}
 tracing = "0.1.44"
 tracing-subscriber = "0.3.23"
-tokio = { workspace = true }
-xkcd = { path = "crates/xkcd" }
 
 [profile.release]
+opt-level = "z"
 strip = true
 lto = true
 panic = "abort"
 codegen-units = 1
-opt-level = "z"

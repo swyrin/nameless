@@ -19,29 +19,36 @@ pub struct XkcdEntry {
     pub year: u64,
 
     /// The link pointing to this XKCD entry.
+    #[allow(unused)]
     pub link: String,
 
     /// The announcement, think like when Randall
     /// advertises What If?
+    #[allow(unused)]
     pub news: String,
 
     /// The image, read out.
     /// For some reason newer XKCD entries does not have this.
+    #[allow(unused)]
     pub transcript: String,
 
     /// The text when hovering on the image.
+    #[allow(unused)]
     pub alt: String,
 
     /// Image URL.
+    #[allow(unused)]
     pub img: String,
 
     /// Entry title.
+    #[allow(unused)]
     pub title: String,
 
     /// The title, but with special characters escaped.
     pub safe_title: String,
 
     /// Extra data that I have no idea.
+    #[allow(unused)]
     pub extra_parts: Option<serde_json::Value>,
 }
 

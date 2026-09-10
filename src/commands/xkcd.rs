@@ -1,11 +1,11 @@
+use crate::extra::xkcd::entry::XkcdEntry;
+use crate::extra::xkcd::fetch::{fetch_latest, fetch_number, fetch_random};
 use crate::types::{NamelessContext, NamelessError};
 use poise::serenity_prelude::Timestamp;
 use poise::{
     CreateReply,
     serenity_prelude::{CreateActionRow, CreateButton, CreateEmbed, CreateEmbedFooter},
 };
-use xkcd::entry::XkcdEntry;
-use xkcd::fetch::asynchronous::{fetch_latest, fetch_number, fetch_random};
 
 fn create_xkcd_button(entry: &XkcdEntry) -> CreateButton {
     CreateButton::new_link(format!("https://xkcd.com/{}/", entry.num)).label("See on XKCD")
