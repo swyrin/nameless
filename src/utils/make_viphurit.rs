@@ -110,4 +110,9 @@ mod test {
     fn vip_preserve_og() {
         assert_eq!(make_viphurit("Vip(hurit)"), "Vip(hurit)");
     }
+
+    #[test]
+    fn vip_prevent_overlaps() {
+        assert_ne!(make_viphurit("Shyloadcc"), "cccc");
+    }
 }
