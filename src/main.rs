@@ -11,6 +11,7 @@ use crate::types::NamelessGlobalData;
 use config::AppConfig;
 use handlers::event_handler;
 use poise::serenity_prelude;
+use songbird::SerenityInit;
 
 #[tokio::main]
 async fn main() {
@@ -63,6 +64,7 @@ async fn main() {
             | serenity_prelude::GatewayIntents::MESSAGE_CONTENT,
     )
     .framework(framework)
+    .register_songbird()
     .await
     .unwrap();
 
