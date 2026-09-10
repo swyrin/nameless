@@ -1,14 +1,14 @@
 use crate::persistence::repository::guild::get_guild;
-use crate::types::{NamelessError, NamelessGlobalData};
+use crate::types::{CommandData, CommandError};
 use poise::FrameworkContext;
 use poise::serenity_prelude::{ChannelId, Message};
 use std::str::FromStr;
 
 pub async fn handle(
     message: &Message,
-    framework: &FrameworkContext<'_, NamelessGlobalData, NamelessError>,
+    framework: &FrameworkContext<'_, CommandData, CommandError>,
 ) {
-    let db = framework.user_data.sql.clone();
+    let db = framework.user_data.db.clone();
 
     if let Some(gid) = message.guild_id
         && let Some(entry) = get_guild(gid, &db).await

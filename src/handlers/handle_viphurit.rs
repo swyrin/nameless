@@ -1,11 +1,11 @@
-use crate::types::{NamelessError, NamelessGlobalData};
+use crate::types::{CommandData, CommandError};
 use crate::utils::make_viphurit::make_viphurit;
 use poise::FrameworkContext;
 use poise::serenity_prelude::Message;
 
 pub async fn handle(
     message: &Message,
-    framework: &FrameworkContext<'_, NamelessGlobalData, NamelessError>,
+    framework: &FrameworkContext<'_, CommandData, CommandError>,
 ) {
     let original_message = message.content.clone();
     let fixed_message = make_viphurit(&original_message.clone()).clone();

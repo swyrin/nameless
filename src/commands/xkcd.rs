@@ -1,6 +1,6 @@
 use crate::extra::xkcd::entry::XkcdEntry;
 use crate::extra::xkcd::fetch::{fetch_latest, fetch_number, fetch_random};
-use crate::types::{NamelessContext, NamelessError};
+use crate::types::{CommandContext, CommandError};
 use poise::serenity_prelude::Timestamp;
 use poise::{
     CreateReply,
@@ -43,18 +43,18 @@ fn create_xkcd_reply(entry: &XkcdEntry) -> CreateReply {
 /// XKCD commands.
 #[poise::command(slash_command, subcommands("get", "random"), subcommand_required)]
 #[allow(clippy::unused_async, reason = "Async required by poise.")]
-pub async fn xkcd(_: NamelessContext<'_>) -> Result<(), NamelessError> {
+pub async fn xkcd(_: CommandContext<'_>) -> Result<(), CommandError> {
     Ok(())
 }
 
 /// Get an XKCD comic.
 #[poise::command(slash_command)]
 pub async fn get(
-    ctx: NamelessContext<'_>,
+    ctx: CommandContext<'_>,
     #[description = "XKCD comic number, blank for latest."]
     #[min = 1]
     number: Option<u64>,
-) -> Result<(), NamelessError> {
+) -> Result<(), CommandError> {
     // https://github.com/seanmonstar/reqwest/issues/1017
     let xkcd = match number {
         Some(num) => fetch_number(num).await,
@@ -69,7 +69,7 @@ pub async fn get(
 
 /// Get a random XKCD comic.
 #[poise::command(slash_command)]
-pub async fn random(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
+pub async fn random(ctx: CommandContext<'_>) -> Result<(), CommandError> {
     let xkcd = fetch_random().await.expect("Unable to call XKCD API");
 
     ctx.send(create_xkcd_reply(&xkcd)).await?;

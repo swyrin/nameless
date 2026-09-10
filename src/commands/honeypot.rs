@@ -1,7 +1,7 @@
 use crate::persistence::model::guild;
 use crate::persistence::model::guild::GuildHoneypotUpdatePayload;
 use crate::persistence::repository::guild::{get_guild, insert_guild, update_guild};
-use crate::types::{NamelessContext, NamelessError};
+use crate::types::{CommandContext, CommandError};
 use poise::serenity_prelude;
 use poise::serenity_prelude::{ChannelId, Mentionable};
 use sea_orm::Set;
@@ -17,15 +17,15 @@ use std::str::FromStr;
     required_bot_permissions = "BAN_MEMBERS"
 )]
 #[allow(clippy::unused_async, reason = "Async required by poise.")]
-pub async fn honeypot(_: NamelessContext<'_>) -> Result<(), NamelessError> {
+pub async fn honeypot(_: CommandContext<'_>) -> Result<(), CommandError> {
     Ok(())
 }
 
 /// Get the bound honeypot channel.
 #[poise::command(slash_command)]
-pub async fn get(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
+pub async fn get(ctx: CommandContext<'_>) -> Result<(), CommandError> {
     let gid = ctx.guild_id().unwrap();
-    let db = ctx.data().sql.clone();
+    let db = ctx.data().db.clone();
 
     if let Some(record) = get_guild(gid, &db).await
         && let Some(honeypot_chn) = record.honeypot_channel
@@ -47,13 +47,13 @@ pub async fn get(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
 /// Bind a honeypot channel.
 #[poise::command(slash_command)]
 pub async fn set(
-    ctx: NamelessContext<'_>,
+    ctx: CommandContext<'_>,
     #[description = "Honeypot channel to bind."]
     #[channel_types("Text")]
     channel: serenity_prelude::GuildChannel,
-) -> Result<(), NamelessError> {
+) -> Result<(), CommandError> {
     let gid = ctx.guild_id().unwrap();
-    let db = ctx.data().sql.clone();
+    let db = ctx.data().db.clone();
 
     if get_guild(gid, &db).await.is_some() {
         update_guild(
@@ -86,9 +86,9 @@ pub async fn set(
 
 /// Unbind a honeypot channel.
 #[poise::command(slash_command)]
-pub async fn unset(ctx: NamelessContext<'_>) -> Result<(), NamelessError> {
+pub async fn unset(ctx: CommandContext<'_>) -> Result<(), CommandError> {
     let gid = ctx.guild_id().unwrap();
-    let db = ctx.data().sql.clone();
+    let db = ctx.data().db.clone();
 
     if get_guild(gid, &db).await.is_some() {
         update_guild(

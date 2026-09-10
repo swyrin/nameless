@@ -1,11 +1,11 @@
 use crate::handlers::{handle_honeypot, handle_viphurit};
-use crate::types::{NamelessError, NamelessGlobalData};
+use crate::types::{CommandData, CommandError};
 use poise::FrameworkContext;
 
 pub async fn event_handler(
-    framework: FrameworkContext<'_, NamelessGlobalData, NamelessError>,
+    framework: FrameworkContext<'_, CommandData, CommandError>,
     event: &poise::serenity_prelude::FullEvent,
-) -> Result<(), NamelessError> {
+) -> Result<(), CommandError> {
     let ctx = framework.serenity_context;
 
     match event {

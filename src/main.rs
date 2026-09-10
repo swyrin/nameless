@@ -7,7 +7,7 @@ mod types;
 mod utils;
 
 use crate::persistence::connection::{acquire_database_connection, perform_database_migration};
-use crate::types::NamelessGlobalData;
+use crate::types::CommandData;
 use config::AppConfig;
 use handlers::event_handler;
 use poise::serenity_prelude;
@@ -51,7 +51,7 @@ async fn main() {
                 }
 
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(NamelessGlobalData { sql: pool })
+                Ok(CommandData { db: pool })
             })
         })
         .build();
